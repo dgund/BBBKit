@@ -21,9 +21,6 @@
 #include <fstream>
 #include <string>
 
-using std::ofstream;
-using std::string;
-
 namespace bbbkit {
 
 typedef int (*CallbackFunction_t)(int);
@@ -36,13 +33,13 @@ public:
 
 private:
     int pin;
-    string path;
-    string name;
+    std::string path;
+    std::string name;
     int debounce;
     CallbackFunction_t threadCallbackFunction;
     pthread_t thread;
     bool threadRunning;
-    ofstream stream;
+    std::ofstream stream;
 
 public:
     GPIO(int pin, GPIO::DIRECTION direction, GPIO::VALUE activeState=HIGH);
@@ -51,8 +48,8 @@ public:
     // Getters and setters
     
     virtual int getPin() { return pin; }
-    virtual string getPath() { return path; }
-    virtual string getName() { return name; }
+    virtual std::string getPath() { return path; }
+    virtual std::string getName() { return name; }
     
     // Minumim delay between GPIO reads, in milliseconds
     virtual int getDebounce() { return debounce; }
@@ -97,3 +94,4 @@ void *threadEdgePoll(void *value);
 } /* namespace bbbkit */
 
 #endif /* GPIO_H_ */
+

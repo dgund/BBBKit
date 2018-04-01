@@ -64,9 +64,9 @@ GPIO::GPIO(int pin, GPIO::DIRECTION direction, GPIO::VALUE activeState) {
     this->threadRunning = false;
 
     // Format the name and path for the BeagleBone
-    ostringstream name;
+    std::ostringstream name;
     name << GPIO_SYSFS_GPIO << pin;
-    this->name = string(name.str());
+    this->name = std::string(name.str());
     this->path = GPIO_SYSFS_PATH + this->name + "/";
 
     // Export the pin (delay to give Linux some time)
@@ -85,7 +85,7 @@ GPIO::~GPIO() {
 // Getters and setters
 
 GPIO::DIRECTION GPIO::getDirection() {
-    string directionString = read(this->path, GPIO_SYSFS_DIRECTION);
+    std::string directionString = read(this->path, GPIO_SYSFS_DIRECTION);
     if (directionString == GPIO_SYSFS_DIRECTION_INPUT) return INPUT;
     else return OUTPUT;
 }
@@ -101,7 +101,7 @@ int GPIO::setDirection(GPIO::DIRECTION direction) {
 }
 
 GPIO::VALUE GPIO::getActiveState() {
-    string  activeLowString = read(this->path, GPIO_SYSFS_ACTIVE_LOW);
+    std::string  activeLowString = read(this->path, GPIO_SYSFS_ACTIVE_LOW);
     if (activeLowString == GPIO_SYSFS_ACTIVE_LOW_FALSE) return HIGH;
     else return LOW;
 }
@@ -119,7 +119,7 @@ int GPIO::setActiveState(GPIO::VALUE activeState) {
 // General input
 
 GPIO::VALUE GPIO::getValue() {
-    string valueString = read(this->path, GPIO_SYSFS_VALUE);
+    std::string valueString = read(this->path, GPIO_SYSFS_VALUE);
     if (valueString == GPIO_SYSFS_VALUE_LOW) return LOW;
     else return HIGH;
 }
@@ -139,7 +139,7 @@ int GPIO::setValue(GPIO::VALUE value) {
 // Edge input
 
 GPIO::EDGE GPIO::getEdgeType() {
-    string edgeTypeString = read(this->path, GPIO_SYSFS_EDGE);
+    std::string edgeTypeString = read(this->path, GPIO_SYSFS_EDGE);
     if (edgeTypeString == GPIO_SYSFS_EDGE_RISING) return RISING;
     else if (edgeTypeString == GPIO_SYSFS_EDGE_FALLING) return FALLING;
     else if (edgeTypeString == GPIO_SYSFS_EDGE_BOTH) return BOTH;
@@ -266,3 +266,4 @@ void *threadEdgePoll(void *value) {
 }
 
 } /* namespace bbbkit */
+

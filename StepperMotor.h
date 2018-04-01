@@ -98,3 +98,4 @@ void *threadStepInternal(void *value);
 } /* namespace bbbkit */
 
 #endif /* STEPPERMOTOR_H_ */
+

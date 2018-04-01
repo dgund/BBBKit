@@ -20,24 +20,22 @@
 #include <iostream>
 #include <sstream>
 
-using namespace std;
-
 namespace bbbkit {
 
-string read(string filepath, string filename) {
-    ifstream readStream;
+std::string read(std::string filepath, std::string filename) {
+    std::ifstream readStream;
     readStream.open((filepath + filename).c_str());
     if (!readStream.is_open()) {
         perror("Readwrite: Read failed to open file.");
     }
-    string value;
-    getline(readStream, value);
+    std::string value;
+    std::getline(readStream, value);
     readStream.close();
     return value;
 }
 
-int write(string filepath, string filename, string value) {
-    ofstream writeStream;
+int write(std::string filepath, std::string filename, std::string value) {
+    std::ofstream writeStream;
     writeStream.open((filepath + filename).c_str());
     if (!writeStream.is_open()) {
        perror("Readwrite: Write failed to open file.");
@@ -48,10 +46,11 @@ int write(string filepath, string filename, string value) {
     return 0;
 }
 
-int write(string filepath, string filename, int value) {
-    stringstream valueStream;
+int write(std::string filepath, std::string filename, int value) {
+    std::stringstream valueStream;
     valueStream << value;
     return write(filepath, filename, valueStream.str());
 }
 
 } /* namespace bbbkit */
+

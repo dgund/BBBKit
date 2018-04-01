@@ -20,14 +20,13 @@
 
 #include <string>
 
-using std::string;
-
 namespace bbbkit {
 
-string read(string filepath, string filename);
-int write(string filepath, string filename, string value);
-int write(string filepath, string filename, int value);
+std::string read(std::string filepath, std::string filename);
+int write(std::string filepath, std::string filename, std::string value);
+int write(std::string filepath, std::string filename, int value);
 
 } /* namespace bbbkit */
 
 #endif /* READWRITE_H_ */
+

@@ -1,21 +1,15 @@
 CXX = g++
-CXXFLAGS = -g -Wall
+CXXFLAGS = -g -fPIC -Wall -Wextra
+LDFLAGS = -shared -lpthread
 
-LD = g++
-LDFLAGS = -lpthread
-
-TARGET = BBBKit
-
+TARGET = BBBKit.so
 SOURCES = $(wildcard *.cpp)
-OBJECTS = $(SOURCES:.c=.o)
+OBJECTS = $(SOURCES:.cpp=.o)
 
-all: $(SOURCES) $(TARGET)
+all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
-
-.cpp.o:
-	$(CXX) $(CXXFLAGS) $< -o $@
+	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $@ $(LDFLAGS)
 
 .PHONY: clean
 clean:
