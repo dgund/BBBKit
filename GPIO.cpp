@@ -38,8 +38,6 @@
 #define GPIO_SYSFS_UNEXPORT "unexport"
 
 #define GPIO_SYSFS_ACTIVE_LOW "active_low"
-#define GPIO_SYSFS_ACTIVE_LOW_FALSE "0"
-#define GPIO_SYSFS_ACTIVE_LOW_TRUE "1"
 
 #define GPIO_SYSFS_DIRECTION "direction"
 #define GPIO_SYSFS_DIRECTION_INPUT "in"
@@ -52,8 +50,6 @@
 #define GPIO_SYSFS_EDGE_NONE "none"
 
 #define GPIO_SYSFS_VALUE "value"
-#define GPIO_SYSFS_VALUE_LOW "0"
-#define GPIO_SYSFS_VALUE_HIGH "1"
 
 namespace bbbkit {
 
@@ -101,39 +97,25 @@ int GPIO::setDirection(GPIO::DIRECTION direction) {
 }
 
 GPIO::VALUE GPIO::getActiveState() {
-    std::string  activeLowString = read(this->path, GPIO_SYSFS_ACTIVE_LOW);
-    if (activeLowString == GPIO_SYSFS_ACTIVE_LOW_FALSE) return HIGH;
-    else return LOW;
+    if (std::stoi(read(this->path, GPIO_SYSFS_ACTIVE_LOW)) == GPIO::VALUE::HIGH) return GPIO::VALUE::LOW;
+    else return GPIO::VALUE::HIGH;
 }
 
 int GPIO::setActiveState(GPIO::VALUE activeState) {
-    switch(activeState) {
-    case LOW:
-        return write(this->path, GPIO_SYSFS_ACTIVE_LOW, GPIO_SYSFS_ACTIVE_LOW_TRUE);
-    case HIGH:
-        return write(this->path, GPIO_SYSFS_ACTIVE_LOW, GPIO_SYSFS_ACTIVE_LOW_FALSE);
-    }
-    return -1;
+    return write(this->path, GPIO_SYSFS_ACTIVE_LOW, !activeState);
 }
 
 // General input
 
 GPIO::VALUE GPIO::getValue() {
-    std::string valueString = read(this->path, GPIO_SYSFS_VALUE);
-    if (valueString == GPIO_SYSFS_VALUE_LOW) return LOW;
-    else return HIGH;
+    if (std::stoi(read(this->path, GPIO_SYSFS_VALUE)) == GPIO::VALUE::LOW) return GPIO::VALUE::LOW;
+    else return GPIO::VALUE::HIGH;
 }
 
 // General output
 
 int GPIO::setValue(GPIO::VALUE value) {
-    switch(value) {
-    case LOW:
-        return write(this->path, GPIO_SYSFS_VALUE, GPIO_SYSFS_VALUE_LOW);
-    case HIGH:
-        return write(this->path, GPIO_SYSFS_VALUE, GPIO_SYSFS_VALUE_HIGH);
-    }
-    return -1;
+    write(this->path, GPIO_SYSFS_VALUE, value);
 }
 
 // Edge input
