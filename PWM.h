@@ -52,6 +52,7 @@ private:
                                      "P9_42",
                                    };
 
+    PWM::PIN pin;
     std::string path;
     std::string name;
 

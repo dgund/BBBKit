@@ -115,7 +115,7 @@ GPIO::VALUE GPIO::getValue() {
 // General output
 
 int GPIO::setValue(GPIO::VALUE value) {
-    write(this->path, GPIO_SYSFS_VALUE, value);
+    return write(this->path, GPIO_SYSFS_VALUE, value);
 }
 
 // Edge input

@@ -32,13 +32,13 @@
 namespace bbbkit {
 
 PWM::PWM(PWM::PIN pin, PWM::VALUE activeState) {
-    this->name = this->nameMap[pin];
+    this->pin = pin;
+    this->name = this->nameMap[this->pin];
     this->path = PWM_SYSFS_PATH + this->name + "/";
     this->setActiveState(activeState);
 }
 
 PWM::~PWM() {}
-
 
 PWM::VALUE PWM::getActiveState() {
     if (std::stoi(read(this->path, PWM_SYSFS_POLARITY)) == PWM::VALUE::LOW) return PWM::VALUE::LOW;
@@ -84,7 +84,7 @@ int PWM::setDutyCycle(unsigned int dutyCycleNS) {
 
 int PWM::setDutyCycleAsPercent(float dutyCyclePercent) {
     if (PERCENT_MIN > dutyCyclePercent || dutyCyclePercent > PERCENT_MAX) return -1;
-    return this->setDutyCycle((float)this->getPeriod * (dutyCyclePercent / PERCENT_MAX));
+    return this->setDutyCycle((float)this->getPeriod() * (dutyCyclePercent / PERCENT_MAX));
 }
 
 int PWM::start() {
