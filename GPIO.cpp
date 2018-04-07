@@ -19,10 +19,8 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
 #include <sstream>
-#include <string>
 #include <fcntl.h>
 #include <pthread.h>
 #include <sys/epoll.h>
@@ -53,16 +51,16 @@
 
 namespace bbbkit {
 
-GPIO::GPIO(int pin, GPIO::DIRECTION direction, GPIO::VALUE activeState) {
+GPIO::GPIO(GPIO::PIN pin, GPIO::DIRECTION direction, GPIO::VALUE activeState) {
     this->pin = pin;
     this->debounce = 0;
     this->threadCallbackFunction = NULL;
     this->threadRunning = false;
 
     // Format the name and path for the BeagleBone
-    std::ostringstream name;
-    name << GPIO_SYSFS_GPIO << pin;
-    this->name = std::string(name.str());
+    std::stringstream nameStream;
+    nameStream << GPIO_SYSFS_GPIO << static_cast<int>(pin);
+    this->name = nameStream.str();
     this->path = GPIO_SYSFS_PATH + this->name + "/";
 
     // Export the pin (delay to give Linux some time)
@@ -231,11 +229,11 @@ int GPIO::streamClose() {
 // Private
 
 int GPIO::exportPin() {
-   return write(GPIO_SYSFS_PATH, GPIO_SYSFS_EXPORT, this->pin);
+   return write(GPIO_SYSFS_PATH, GPIO_SYSFS_EXPORT, static_cast<int>(this->pin));
 }
 
 int GPIO::unexportPin() {
-   return write(GPIO_SYSFS_PATH, GPIO_SYSFS_UNEXPORT, this->pin);
+   return write(GPIO_SYSFS_PATH, GPIO_SYSFS_UNEXPORT, static_cast<int>(this->pin));
 }
 
 void *threadEdgePoll(void *value) {
