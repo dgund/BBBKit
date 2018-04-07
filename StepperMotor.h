@@ -29,40 +29,36 @@ public:
 
 private:
     // PLS
-    GPIO *gpio_PLS;
+    GPIO *gpioPLS;
     // DIR
-    GPIO *gpio_DIR;
+    GPIO *gpioDIR;
     // AWO
-    GPIO *gpio_AWO;
+    GPIO *gpioAWO;
     // CS
-    GPIO *gpio_CS;
+    GPIO *gpioCS;
     // ALM
-    GPIO *gpio_ALM;
+    GPIO *gpioALM;
     // TIM
-    GPIO *gpio_TIM;
+    GPIO *gpioTIM;
 
-    DIRECTION direction;
+    StepperMotor::DIRECTION direction;
     int stepsPerRevolution;
     float revolutionsPerMinute;
-    bool sleeping;
+    bool isSleeping;
     // Delay between steps, in microseconds
-    int stepDelay;
-
-    pthread_t thread;
-    bool threadRunning;
-    CallbackFunction_t threadCallbackFunction;
-    int threadStepCount;
+    int stepDelayUS;
 
 public:
-    StepperMotor(int pin_PLS, int pin_DIR, int pin_AWO, int pin_CS,
-                 int pin_ALM, int pin_TIM, int stepsPerRevolution = 1000,
-                 int revolutionsPerMinute = 60);
+    StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gpioCS,
+                 GPIO *gpioALM, GPIO *gpioTIM,
+                 StepperMotor::Direction direction=StepperMotor::CLOCKWISE,
+                 int stepsPerRevolution=1000, int revolutionsPerMinute=60);
     virtual ~StepperMotor();
     
     // Getters and setters
     
-    virtual DIRECTION getDirection() { return this->direction; }
-    virtual int setDirection(DIRECTION direction);
+    virtual StepperMotor::DIRECTION getDirection() { return this->direction; }
+    virtual int setDirection(StepperMotor::DIRECTION direction);
 
     virtual int getStepsPerRevolution() { return this->stepsPerRevolution; }
     virtual int setStepsPerRevolution(int stepsPerRevolution);
@@ -70,8 +66,8 @@ public:
     virtual float getRevolutionsPerMinute() { return this->revolutionsPerMinute; }
     virtual int setRevolutionsPerMinute(float revolutionsPerMinute);
     
-    virtual bool getSleeping() { return this->sleeping; }
-    virtual int setSleeping(bool sleeping);
+    virtual bool getIsSleeping() { return this->isSleeping; }
+    virtual int setIsSleeping(bool isSleeping);
 
     virtual GPIO::VALUE getAlarm();
     virtual GPIO::VALUE getTimer();
@@ -82,18 +78,9 @@ public:
     virtual void step(int numberOfSteps);
     virtual void rotate(float degrees);
 
-    // Threaded stepping
-
-    virtual int threadStep(int numberOfSteps, CallbackFunction_t callbackFunction);
-    virtual int threadStepForever();
-    virtual void stopThreadStep() { this->threadRunning = false; }
-
 private:
     virtual int updateStepDelay();
-    friend void *threadStepInternal(void *value);
 };
-
-void *threadStepInternal(void *value);
 
 } /* namespace bbbkit */
 

@@ -23,27 +23,29 @@
 
 namespace bbbkit {
 
-StepperMotor::StepperMotor(int pin_PLS, int pin_DIR, int pin_AWO, int pin_CS,
-                           int pin_ALM, int pin_TIM, int stepsPerRevolution,
-                           int revolutionsPerMinute) {
-
-    this->gpio_PLS = new GPIO(pin_PLS, GPIO::OUTPUT);
-    this->gpio_DIR = new GPIO(pin_DIR, GPIO::OUTPUT);
-    this->gpio_AWO = new GPIO(pin_AWO, GPIO::OUTPUT);
-    this->gpio_CS = new GPIO(pin_CS, GPIO::OUTPUT);
-    this->gpio_ALM = new GPIO(pin_ALM, GPIO::INPUT);
-    this->gpio_TIM = new GPIO(pin_TIM, GPIO::INPUT);
+StepperMotor::StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gpioCS,
+                           GPIO *gpioALM, GPIO *gpioTIM,
+                           StepperMotor::Direction direction,
+                           int stepsPerRevolution, int revolutionsPerMinute) {
+    this->gpioPLS = gpioPLS;
+    this->gpioDIR = gpioDIR;
+    this->gpioAWO = gpioAWO;
+    this->gpioCS = gpioCS;
+    this->gpioALM = gpioALM;
+    this->gpioTIM = gpioTIM;
 
     // Set delay
     this->stepsPerRevolution = stepsPerRevolution;
     this->revolutionsPerMinute = revolutionsPerMinute;
     this->updateStepDelay();
 
-    // Default direction to clockwise
-    this->setDirection(StepperMotor::CLOCKWISE);
+    // Set direction
+    this->setDirection(direction);
 
-    // Default step angle to basic
-    this->gpio_CS->setValue(GPIO::HIGH);
+    // Set default step angle to basic
+    if (this->gpioCS != NULL) {
+        this->gpioCS->setValue(GPIO::HIGH);
+    }
 }
 
 StepperMotor::~StepperMotor() {}
@@ -51,20 +53,14 @@ StepperMotor::~StepperMotor() {}
 // Getters and setters
 
 int StepperMotor::setDirection(StepperMotor::DIRECTION direction) {
-    if (this->direction != direction) {
-        this->direction = direction;
-        switch (this->direction) {
-        case CLOCKWISE:
-            this->gpio_DIR->setValue(GPIO::HIGH);
-            break;
-        case COUNTERCLOCKWISE:
-            this->gpio_DIR->setValue(GPIO::LOW);
-            break;
-        default:
-            return -1;
-        }
+    this->direction = direction;
+
+    if (this->direction == StepperMotor::DIRECTION::CLOCKWISE){
+        return this->gpioDIR->setValue(GPIO::HIGH);
     }
-    return 0;
+    else {
+        return this->gpioDIR->setValue(GPIO::LOW);
+    }
 }
 
 int StepperMotor::setStepsPerRevolution(int stepsPerRevolution) {
@@ -77,60 +73,42 @@ int StepperMotor::setRevolutionsPerMinute(float revolutionsPerMinute) {
     return this->updateStepDelay();
 }
 
-int StepperMotor::setSleeping(bool sleeping) {
-    if (this->sleeping != sleeping) {
-        this->sleeping = sleeping;
-        if (this->sleeping) this->gpio_AWO->setValue(GPIO::HIGH);
-        else this->gpio_AWO->setValue(GPIO::LOW);
+int StepperMotor::setIsSleeping(bool isSleeping) {
+    this->isSleeping = isSleeping;
+    if (this->isSleeping) {
+        return this->gpioAWO->setValue(GPIO::HIGH);
     }
-    return 0;
+    else {
+        return this->gpioAWO->setValue(GPIO::LOW);
+    }
 }
 
 GPIO::VALUE StepperMotor::getAlarm() {
-    return this->gpio_ALM->getValue();
+    return this->gpioALM->getValue();
 }
 
 GPIO::VALUE StepperMotor::getTimer() {
-    return this->gpio_TIM->getValue();
+    return this->gpioTIM->getValue();
 }
 
 // Stepping
 
 void StepperMotor::step() {
-    this->gpio_PLS->setValue(GPIO::HIGH);
-    this->gpio_PLS->setValue(GPIO::LOW);
+    this->gpioPLS->setValue(GPIO::HIGH);
+    this->gpioPLS->setValue(GPIO::LOW);
 }
 
 void StepperMotor::step(int numberOfSteps) {
     for (int steps = 0; steps < numberOfSteps; steps++) {
         this->step();
-        usleep(this->stepDelay);
+        usleep(this->stepDelayUS);
     }
 }
 
 void StepperMotor::rotate(float angle) {
     float stepAngle = 360.0f/(float)(this->stepsPerRevolution);
-    int numberOfSteps = round(angle/stepAngle);
+    int numberOfSteps = round(angle / stepAngle);
     this->step(numberOfSteps);
-}
-
-// Threaded stepping
-
-int StepperMotor::threadStep(int numberOfSteps, CallbackFunction_t callbackFunction) {
-    this->threadStepCount = numberOfSteps;
-    this->threadCallbackFunction = callbackFunction;
-
-    this->threadRunning = true;
-    if(pthread_create(&this->thread, NULL, &threadStepInternal, static_cast<void*>(this)) != 0){
-        perror("StepperMotor: Failed to create the stepping thread.");
-        this->threadRunning = false;
-        return -1;
-    }
-    return 0;
-}
-
-int StepperMotor::threadStepForever() {
-    return this->threadStep(-1, NULL);
 }
 
 // Private
@@ -138,22 +116,7 @@ int StepperMotor::threadStepForever() {
 int StepperMotor::updateStepDelay() {
     // Assumes that the step signal takes no time (false but negligible)
     float revolutionsPerMicrosecond = (60.0f * 1000.0f * 1000.0f) / (float)(this->revolutionsPerMinute);
-    this->stepDelay = (int)(revolutionsPerMicrosecond / this->stepsPerRevolution);
-    return 0;
-}
-
-void *threadStepInternal(void *value) {
-    StepperMotor *stepper = static_cast<StepperMotor*>(value);
-    int steps = 0;
-    while(stepper->threadRunning) {
-        if (stepper->threadStepCount != -1 && steps >= stepper->threadStepCount) {
-            if (stepper->threadCallbackFunction) stepper->threadCallbackFunction(steps);
-            break;
-        }
-        stepper->step();
-        steps++;
-        usleep(stepper->stepDelay);
-    }
+    this->stepDelayUS = (int)(revolutionsPerMicrosecond / this->stepsPerRevolution);
     return 0;
 }
 
