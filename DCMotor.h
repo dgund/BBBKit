@@ -38,7 +38,7 @@ private:
     float speedPercent;
 
 public:
-    DCMotor(GPIO *gpio, PWM *pwm, DCMotor::Direction direction=DCMotor::CLOCKWISE, float speedPercent=0.0, int dutyCyclePeriodNS=4000);
+    DCMotor(GPIO *gpio, PWM *pwm, DCMotor::DIRECTION direction=DCMotor::DIRECTION::CLOCKWISE, float speedPercent=0.0, int dutyCyclePeriodNS=4000);
     virtual ~DCMotor();
     
     // Getters and setters

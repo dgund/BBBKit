@@ -19,7 +19,7 @@
 
 namespace bbbkit {
 
-DCMotor::DCMotor(GPIO *gpio, PWM *pwm, DCMotor::Direction direction, float speedPercent, int dutyCyclePeriodNS) {
+DCMotor::DCMotor(GPIO *gpio, PWM *pwm, DCMotor::DIRECTION direction, float speedPercent, int dutyCyclePeriodNS) {
     this->gpio = gpio;
     this->gpio->setDirection(GPIO::OUTPUT);
     this->pwm = pwm;

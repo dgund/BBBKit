@@ -51,7 +51,7 @@ private:
 public:
     StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gpioCS,
                  GPIO *gpioALM, GPIO *gpioTIM,
-                 StepperMotor::Direction direction=StepperMotor::CLOCKWISE,
+                 StepperMotor::DIRECTION direction=StepperMotor::DIRECTION::CLOCKWISE,
                  int stepsPerRevolution=1000, int revolutionsPerMinute=60);
     virtual ~StepperMotor();
     

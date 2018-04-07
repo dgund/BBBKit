@@ -25,7 +25,7 @@ namespace bbbkit {
 
 StepperMotor::StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gpioCS,
                            GPIO *gpioALM, GPIO *gpioTIM,
-                           StepperMotor::Direction direction,
+                           StepperMotor::DIRECTION direction,
                            int stepsPerRevolution, int revolutionsPerMinute) {
     this->gpioPLS = gpioPLS;
     this->gpioDIR = gpioDIR;
