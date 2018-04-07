@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -g -fPIC -Wall -Wextra
-LDFLAGS = -shared
+LDFLAGS = -shared -lpthread
 
 TARGET = BBBKit.so
 SOURCES = $(wildcard *.cpp)
