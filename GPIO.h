@@ -51,7 +51,7 @@ public:
     virtual std::string getPath() { return path; }
     virtual std::string getName() { return name; }
     
-    // Minumim delay between GPIO reads, in milliseconds
+    // Minimum delay between GPIO reads, in milliseconds
     virtual int getDebounce() { return debounce; }
     virtual int setDebounce(int debounce) { this->debounce = debounce; return 0; }
 

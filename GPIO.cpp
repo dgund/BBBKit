@@ -168,7 +168,7 @@ int GPIO::waitForEdge() {
     event.events = EPOLLIN | EPOLLET | EPOLLPRI;
     event.data.fd = fd;
 
-    // Register event and file descripter on epoll instance
+    // Register event and file descriptor on epoll instance
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event) < 0) {
         perror("GPIO: Failed to register epoll event.");
         close (fd);
