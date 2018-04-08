@@ -44,8 +44,10 @@ StepperMotor::StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gp
 
     // Set default step angle to basic
     if (this->gpioCS != NULL) {
-        this->gpioCS->setValue(GPIO::HIGH);
+        this->gpioCS->setValue(GPIO::VALUE::HIGH);
     }
+
+    this->setIsSleeping(false);
 }
 
 StepperMotor::~StepperMotor() {}
@@ -56,10 +58,10 @@ int StepperMotor::setDirection(StepperMotor::DIRECTION direction) {
     this->direction = direction;
 
     if (this->direction == StepperMotor::DIRECTION::CLOCKWISE){
-        return this->gpioDIR->setValue(GPIO::HIGH);
+        return this->gpioDIR->setValue(GPIO::VALUE::HIGH);
     }
     else {
-        return this->gpioDIR->setValue(GPIO::LOW);
+        return this->gpioDIR->setValue(GPIO::VALUE::LOW);
     }
 }
 
@@ -76,10 +78,10 @@ int StepperMotor::setRevolutionsPerMinute(float revolutionsPerMinute) {
 int StepperMotor::setIsSleeping(bool isSleeping) {
     this->isSleeping = isSleeping;
     if (this->isSleeping) {
-        return this->gpioAWO->setValue(GPIO::HIGH);
+        return this->gpioAWO->setValue(GPIO::VALUE::HIGH);
     }
     else {
-        return this->gpioAWO->setValue(GPIO::LOW);
+        return this->gpioAWO->setValue(GPIO::VALUE::LOW);
     }
 }
 
@@ -94,8 +96,8 @@ GPIO::VALUE StepperMotor::getTimer() {
 // Stepping
 
 void StepperMotor::step() {
-    this->gpioPLS->setValue(GPIO::HIGH);
-    this->gpioPLS->setValue(GPIO::LOW);
+    this->gpioPLS->setValue(GPIO::VALUE::LOW);
+    this->gpioPLS->setValue(GPIO::VALUE::HIGH);
 }
 
 void StepperMotor::step(int numberOfSteps) {
@@ -107,7 +109,7 @@ void StepperMotor::step(int numberOfSteps) {
 
 void StepperMotor::rotate(float angle) {
     float stepAngle = 360.0f/(float)(this->stepsPerRevolution);
-    int numberOfSteps = round(angle / stepAngle);
+    int numberOfSteps = floor(angle / stepAngle + 0.5);
     this->step(numberOfSteps);
 }
 
@@ -115,8 +117,8 @@ void StepperMotor::rotate(float angle) {
 
 int StepperMotor::updateStepDelay() {
     // Assumes that the step signal takes no time (false but negligible)
-    float revolutionsPerMicrosecond = (60.0f * 1000.0f * 1000.0f) / (float)(this->revolutionsPerMinute);
-    this->stepDelayUS = (int)(revolutionsPerMicrosecond / this->stepsPerRevolution);
+    float stepDelay = (60.0f / this->revolutionsPerMinute) / this->stepsPerRevolution;
+    this->stepDelayUS = (int)(stepDelay * 1000.0f * 1000.0f);
     return 0;
 }
 
