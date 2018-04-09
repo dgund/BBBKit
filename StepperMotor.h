@@ -42,6 +42,7 @@ private:
     GPIO *gpioTIM;
 
     StepperMotor::DIRECTION direction;
+    int stepFactor;
     int stepsPerRevolution;
     float revolutionsPerMinute;
     bool isSleeping;
@@ -52,13 +53,16 @@ public:
     StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gpioCS,
                  GPIO *gpioALM, GPIO *gpioTIM,
                  StepperMotor::DIRECTION direction=StepperMotor::DIRECTION::CLOCKWISE,
-                 int stepsPerRevolution=1000, int revolutionsPerMinute=60);
+                 int stepsPerRevolution=1000, int revolutionsPerMinute=60, int stepFactor=1);
     virtual ~StepperMotor();
     
     // Getters and setters
     
     virtual StepperMotor::DIRECTION getDirection() { return this->direction; }
     virtual int setDirection(StepperMotor::DIRECTION direction);
+
+    virtual int getStepFactor() { return this->stepFactor; }
+    virtual int setStepFactor(int stepFactor);
 
     virtual int getStepsPerRevolution() { return this->stepsPerRevolution; }
     virtual int setStepsPerRevolution(int stepsPerRevolution);

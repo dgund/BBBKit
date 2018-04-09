@@ -26,7 +26,7 @@ namespace bbbkit {
 StepperMotor::StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gpioCS,
                            GPIO *gpioALM, GPIO *gpioTIM,
                            StepperMotor::DIRECTION direction,
-                           int stepsPerRevolution, int revolutionsPerMinute) {
+                           int stepsPerRevolution, int revolutionsPerMinute, int stepFactor) {
     this->gpioPLS = gpioPLS;
     this->gpioDIR = gpioDIR;
     this->gpioAWO = gpioAWO;
@@ -37,6 +37,7 @@ StepperMotor::StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gp
     // Set delay
     this->stepsPerRevolution = stepsPerRevolution;
     this->revolutionsPerMinute = revolutionsPerMinute;
+    this->stepFactor = stepFactor;
     this->updateStepDelay();
 
     // Set direction
@@ -63,6 +64,11 @@ int StepperMotor::setDirection(StepperMotor::DIRECTION direction) {
     else {
         return this->gpioDIR->setValue(GPIO::VALUE::LOW);
     }
+}
+
+int StepperMotor::setStepFactor(int stepFactor) {
+    this->stepFactor = stepFactor;
+    return 0;
 }
 
 int StepperMotor::setStepsPerRevolution(int stepsPerRevolution) {
@@ -101,15 +107,16 @@ void StepperMotor::step() {
 }
 
 void StepperMotor::step(int numberOfSteps) {
+    int delay = this->stepDelayUS / this->stepFactor;
     for (int steps = 0; steps < numberOfSteps; steps++) {
         this->step();
-        usleep(this->stepDelayUS);
+        usleep(delay);
     }
 }
 
 void StepperMotor::rotate(float angle) {
     float stepAngle = 360.0f/(float)(this->stepsPerRevolution);
-    int numberOfSteps = floor(angle / stepAngle + 0.5);
+    int numberOfSteps = floor((float)this->stepFactor * angle / stepAngle + 0.5);
     this->step(numberOfSteps);
 }
 
