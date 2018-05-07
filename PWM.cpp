@@ -19,7 +19,45 @@
 
 #include "Readwrite.h"
 
-#define PWM_SYSFS_PATH "/sys/devices/ocp.3/"
+/*
+    The PWM interface configuration appears to change between kernel updates, so
+    these paths may change. To determine the new PWM interface paths, see my
+    post at https://stackoverflow.com/questions/50204329/pwm-chip-to-pin-mapping-on-beaglebone-black-v4-14.
+*/
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+#define PWM_SYSFS_PATH_PWMCHIP(chip) "/sys/class/pwm/pwmchip" STR(chip)
+#define PWM_SYSFS_PWM(chip, channel) "pwm-" STR(chip) ":" STR(channel)
+
+#define PWM_SYSFS_EHRPWM0_CHIP 1
+#define PWM_SYSFS_EHRPWM0A_CHANNEL 0
+#define PWM_SYSFS_EHRPWM0B_CHANNEL 1
+#define PWM_SYSFS_EHRPWM1_CHIP 3
+#define PWM_SYSFS_EHRPWM1A_CHANNEL 0
+#define PWM_SYSFS_EHRPWM1B_CHANNEL 1
+#define PWM_SYSFS_EHRPWM2_CHIP 6
+#define PWM_SYSFS_EHRPWM2A_CHANNEL 0
+#define PWM_SYSFS_EHRPWM2B_CHANNEL 1
+#define PWM_SYSFS_ECAP0_CHIP 0
+#define PWM_SYSFS_ECAP0_CHANNEL 0
+
+#define PWM_SYSFS_PATH_EHRPWM0 PWM_SYSFS_PATH_PWMCHIP(PWM_SYSFS_EHRPWM0_CHIP)
+#define PWM_SYSFS_PATH_EHRPWM1 PWM_SYSFS_PATH_PWMCHIP(PWM_SYSFS_EHRPWM1_CHIP)
+#define PWM_SYSFS_PATH_EHRPWM2 PWM_SYSFS_PATH_PWMCHIP(PWM_SYSFS_EHRPWM2_CHIP)
+#define PWM_SYSFS_PATH_ECAP0   PWM_SYSFS_PATH_PWMCHIP(PWM_SYSFS_ECAP0_CHIP)
+
+#define PWM_SYSFS_EHRPWM0A PWM_SYSFS_PWM(PWM_SYSFS_EHRPWM0_CHIP, PWM_SYSFS_EHRPWM0A_CHANNEL)
+#define PWM_SYSFS_EHRPWM0B PWM_SYSFS_PWM(PWM_SYSFS_EHRPWM0_CHIP, PWM_SYSFS_EHRPWM0B_CHANNEL)
+#define PWM_SYSFS_EHRPWM1A PWM_SYSFS_PWM(PWM_SYSFS_EHRPWM1_CHIP, PWM_SYSFS_EHRPWM1A_CHANNEL)
+#define PWM_SYSFS_EHRPWM1B PWM_SYSFS_PWM(PWM_SYSFS_EHRPWM1_CHIP, PWM_SYSFS_EHRPWM1B_CHANNEL)
+#define PWM_SYSFS_EHRPWM2A PWM_SYSFS_PWM(PWM_SYSFS_EHRPWM2_CHIP, PWM_SYSFS_EHRPWM2A_CHANNEL)
+#define PWM_SYSFS_EHRPWM2B PWM_SYSFS_PWM(PWM_SYSFS_EHRPWM2_CHIP, PWM_SYSFS_EHRPWM2B_CHANNEL)
+#define PWM_SYSFS_ECAP0    PWM_SYSFS_PWM(PWM_SYSFS_ECAP0_CHIP,   PWM_SYSFS_ECAP0_CHANNEL)
+
+#define PWM_SYSFS_DELAY 200000
+#define PWM_SYSFS_EXPORT "export"
 #define PWM_SYSFS_DUTY "duty"
 #define PWM_SYSFS_PERIOD "period"
 #define PWM_SYSFS_POLARITY "polarity"
@@ -29,16 +67,54 @@
 #define PERCENT_MAX 100.0
 #define NANO 1000000000.0
 
+const std::string pathMap[7] = {
+    PWM_SYSFS_PATH_EHRPWM0,
+    PWM_SYSFS_PATH_EHRPWM0,
+    PWM_SYSFS_PATH_EHRPWM1,
+    PWM_SYSFS_PATH_EHRPWM1,
+    PWM_SYSFS_PATH_EHRPWM2,
+    PWM_SYSFS_PATH_EHRPWM2,
+    PWM_SYSFS_PATH_ECAP0,
+}
+
+const std::string nameMap[7] = {
+    PWM_SYSFS_EHRPWM0A,
+    PWM_SYSFS_EHRPWM0B,
+    PWM_SYSFS_EHRPWM1A,
+    PWM_SYSFS_EHRPWM1B,
+    PWM_SYSFS_EHRPWM2A,
+    PWM_SYSFS_EHRPWM2B,
+    PWM_SYSFS_ECAP0,
+};
+
+const int channelMap[7] = {
+    PWM_SYSFS_EHRPWM0A_CHANNEL,
+    PWM_SYSFS_EHRPWM0B_CHANNEL,
+    PWM_SYSFS_EHRPWM1A_CHANNEL,
+    PWM_SYSFS_EHRPWM1B_CHANNEL,
+    PWM_SYSFS_EHRPWM2A_CHANNEL,
+    PWM_SYSFS_EHRPWM2B_CHANNEL,
+    PWM_SYSFS_ECAP0_CHANNEL,
+};
+
 namespace bbbkit {
 
 PWM::PWM(PWM::PIN pin, PWM::VALUE activeState) {
     this->pin = pin;
-    this->name = this->nameMap[this->pin];
-    this->path = PWM_SYSFS_PATH + this->name + "/";
+    this->name = this->nameMap[static_cast<int>(this->pin)];
+    this->path = this->pathMap[static_cast<int>(this->pin)] + this->name + "/";
+
+    // Export the pin (delay to give Linux some time)
+    this->exportPin();
+    usleep(PWM_SYSFS_DELAY);
+
+    // Set active state
     this->setActiveState(activeState);
 }
 
-PWM::~PWM() {}
+PWM::~PWM() {
+    this->unexportPin();
+}
 
 PWM::VALUE PWM::getActiveState() {
     if (std::stoi(read(this->path, PWM_SYSFS_POLARITY)) == PWM::VALUE::LOW) return PWM::VALUE::LOW;
@@ -97,6 +173,16 @@ bool PWM::isRunning() {
 
 int PWM::stop() {
     return write(this->path, PWM_SYSFS_RUN, PWM::VALUE::LOW);
+}
+
+// Private
+
+int PWM::exportPin() {
+   return write(this->pathMap[static_cast<int>(this->pin)], GPIO_SYSFS_EXPORT, this->channelMap[static_cast<int>(this->pin)]);
+}
+
+int PWM::unexportPin() {
+   return write(this->pathMap[static_cast<int>(this->pin)], GPIO_SYSFS_UNEXPORT, this->channelMap[static_cast<int>(this->pin)]);
 }
 
 } /* namespace bbbkit */

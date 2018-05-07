@@ -24,34 +24,26 @@ namespace bbbkit {
 
 class PWM {
 public:
-    enum PIN { P8_13    = 0,
-               P8_19    = 1,
-               P9_14    = 2,
-               P9_16    = 3,
-               P9_21    = 4,
-               P9_22    = 5,
-               P9_42    = 6,
-               EHRPWM2B = P8_13,
-               EHRPWM2A = P8_19,
-               EHRPWM1A = P9_14,
-               EHRPWM1B = P9_16,
-               EHRPWM0B = P9_21,
-               EHRPWM0A = P9_22,
-               ECAP0    = P9_42,
-             };
+    enum PIN {
+        EHRPWM0A = 0,
+        EHRPWM0B = 1,
+        EHRPWM1A = 2,
+        EHRPWM1B = 3,
+        EHRPWM2A = 4,
+        EHRPWM2B = 5,
+        ECAP0    = 6,
+        P8_13 = EHRPWM2B,
+        P8_19 = EHRPWM2A,
+        P9_14 = EHRPWM1A,
+        P9_16 = EHRPWM1B,
+        P9_21 = EHRPWM0B,
+        P9_22 = EHRPWM0A,
+        P9_42 = ECAP0,
+    };
 
     enum VALUE{ LOW=0, HIGH=1 };
 
 private:
-    const std::string nameMap[7] = { "P8_13",
-                                     "P8_19",
-                                     "P9_14",
-                                     "P9_16",
-                                     "P9_21",
-                                     "P9_22",
-                                     "P9_42",
-                                   };
-
     PWM::PIN pin;
     std::string path;
     std::string name;
@@ -83,6 +75,10 @@ public:
     virtual int start();
     virtual bool isRunning();
     virtual int stop();
+
+private:
+    int exportPin();
+    int unexportPin();
 };
 
 } /* namespace bbbkit */
