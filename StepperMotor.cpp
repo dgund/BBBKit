@@ -18,21 +18,16 @@
 #include "StepperMotor.h"
 
 #include <cmath>
-#include <iostream>
-#include <unistd.h>
 
 namespace bbbkit {
 
-StepperMotor::StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gpioCS,
-                           GPIO *gpioALM, GPIO *gpioTIM,
-                           StepperMotor::DIRECTION direction,
-                           int stepsPerRevolution, float revolutionsPerMinute, int stepFactor) {
-    this->gpioPLS = gpioPLS;
-    this->gpioDIR = gpioDIR;
-    this->gpioAWO = gpioAWO;
-    this->gpioCS = gpioCS;
-    this->gpioALM = gpioALM;
-    this->gpioTIM = gpioTIM;
+StepperMotor::StepperMotor(GPIO::PIN pinStep, GPIO::PIN pinDirection, GPIO::PIN pinSleep,
+                            StepperMotor::DIRECTION direction=StepperMotor::DIRECTION::CLOCKWISE,
+                            int stepsPerRevolution, float revolutionsPerMinute, int stepFactor) {
+    // Initialize GPIO pins
+    this->gpioStep = new GPIO(pinStep, GPIO::DIRECTION::OUTPUT);
+    this->gpioDirection = new GPIO(pinDirection, GPIO::DIRECTION::OUTPUT);
+    this->gpioSleep = new GPIO(pinSleep, GPIO::DIRECTION::OUTPUT);
 
     // Set delay
     this->stepsPerRevolution = stepsPerRevolution;
@@ -42,11 +37,6 @@ StepperMotor::StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gp
 
     // Set direction
     this->setDirection(direction);
-
-    // Set default step angle to basic
-    if (this->gpioCS != NULL) {
-        this->gpioCS->setValue(GPIO::VALUE::HIGH);
-    }
 
     this->setIsSleeping(false);
 }
@@ -59,10 +49,10 @@ int StepperMotor::setDirection(StepperMotor::DIRECTION direction) {
     this->direction = direction;
 
     if (this->direction == StepperMotor::DIRECTION::CLOCKWISE){
-        return this->gpioDIR->setValue(GPIO::VALUE::HIGH);
+        return this->gpioDirection->setValue(GPIO::VALUE::HIGH);
     }
     else {
-        return this->gpioDIR->setValue(GPIO::VALUE::LOW);
+        return this->gpioDirection->setValue(GPIO::VALUE::LOW);
     }
 }
 
@@ -84,26 +74,18 @@ int StepperMotor::setRevolutionsPerMinute(float revolutionsPerMinute) {
 int StepperMotor::setIsSleeping(bool isSleeping) {
     this->isSleeping = isSleeping;
     if (this->isSleeping) {
-        return this->gpioAWO->setValue(GPIO::VALUE::HIGH);
+        return this->gpioSleep->setValue(GPIO::VALUE::HIGH);
     }
     else {
-        return this->gpioAWO->setValue(GPIO::VALUE::LOW);
+        return this->gpioSleep->setValue(GPIO::VALUE::LOW);
     }
-}
-
-GPIO::VALUE StepperMotor::getAlarm() {
-    return this->gpioALM->getValue();
-}
-
-GPIO::VALUE StepperMotor::getTimer() {
-    return this->gpioTIM->getValue();
 }
 
 // Stepping
 
 void StepperMotor::step() {
-    this->gpioPLS->setValue(GPIO::VALUE::LOW);
-    this->gpioPLS->setValue(GPIO::VALUE::HIGH);
+    this->gpioStep->setValue(GPIO::VALUE::LOW);
+    this->gpioStep->setValue(GPIO::VALUE::HIGH);
 }
 
 void StepperMotor::step(int numberOfSteps) {

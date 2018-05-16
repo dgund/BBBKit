@@ -15,8 +15,8 @@
     limitations under the License.
 */
 
-#ifndef STEPPERMOTOR_H_
-#define STEPPERMOTOR_H_
+#ifndef STEPPERMOTOR_H
+#define STEPPERMOTOR_H
 
 #include "GPIO.h"
 
@@ -28,18 +28,12 @@ public:
     enum DIRECTION { CLOCKWISE, COUNTERCLOCKWISE };
 
 private:
-    // PLS
-    GPIO *gpioPLS;
-    // DIR
-    GPIO *gpioDIR;
-    // AWO
-    GPIO *gpioAWO;
-    // CS
-    GPIO *gpioCS;
-    // ALM
-    GPIO *gpioALM;
-    // TIM
-    GPIO *gpioTIM;
+    // GPIO pin for stepping motor
+    GPIO *gpioStep;
+    // GPIO pin for setting motor direction
+    GPIO *gpioDirection;
+    // GPIO pin for sleeping motor
+    GPIO *gpioSleep;
 
     StepperMotor::DIRECTION direction;
     int stepFactor;
@@ -50,8 +44,7 @@ private:
     int stepDelayUS;
 
 public:
-    StepperMotor(GPIO *gpioPLS, GPIO *gpioDIR, GPIO *gpioAWO, GPIO *gpioCS,
-                 GPIO *gpioALM, GPIO *gpioTIM,
+    StepperMotor(GPIO::PIN pinStep, GPIO::PIN pinDirection, GPIO::PIN pinSleep,
                  StepperMotor::DIRECTION direction=StepperMotor::DIRECTION::CLOCKWISE,
                  int stepsPerRevolution=1000, float revolutionsPerMinute=60.0f, int stepFactor=1);
     virtual ~StepperMotor();
@@ -73,20 +66,17 @@ public:
     virtual bool getIsSleeping() { return this->isSleeping; }
     virtual int setIsSleeping(bool isSleeping);
 
-    virtual GPIO::VALUE getAlarm();
-    virtual GPIO::VALUE getTimer();
-
     // Stepping
 
     virtual void step();
     virtual void step(int numberOfSteps);
     virtual void rotate(float degrees);
 
-private:
+protected:
     virtual int updateStepDelay();
 };
 
 } /* namespace bbbkit */
 
-#endif /* STEPPERMOTOR_H_ */
+#endif /* STEPPERMOTOR_H */
 
