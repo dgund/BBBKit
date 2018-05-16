@@ -37,9 +37,8 @@ namespace bbbkit {
 
     ADC::~ADC() {}
     
-    // Read analog-to-digital value
-    
-    int ADC::read() {
+    // Read raw voltage value (in millivolts)
+    int ADC::readVoltage() {
         int voltageMV = -1;
         std::ifstream adcValueStream;
         adcValueStream.open(this->path.c_str(), std::ios::in);
@@ -50,6 +49,13 @@ namespace bbbkit {
         adcValueStream >> voltageMV;
         adcValueStream.close();
         return voltageMV;
+    }
+
+    // Read voltage as a ratio between min and max
+    float ADC::readPercent() {
+        int voltageMV = this->readVoltage();
+        float ratio = ((float)voltageMV - float(this->voltageMinMV)) / (float(this->voltageMaxMV) - float(this->voltageMinMV));
+        return ratio;
     }
 
 } /* namespace bbbkit */

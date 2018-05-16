@@ -43,23 +43,24 @@ private:
                                      "AIN6",
                                    };
     ADC::PIN pin;
+    int voltageMinMV;
+    int voltageMaxMV;
     std::string path;
     std::string name;
 
 public:
-    ADC(ADC::PIN pin);
+    ADC(ADC::PIN pin, int voltageMinMV=0, int voltageMaxMV=1800);
     virtual ~ADC();
-
-    // Getters and setters
     
-    virtual ADC::PIN getPin() { return pin; }
-    virtual std::string getPath() { return path; }
-    virtual std::string getName() { return name; }
-    
-    // Read analog-to-digital value
+    virtual ADC::PIN getPin() { return this->pin; }
+    virtual std::string getPath() { return this->path; }
+    virtual std::string getName() { return this->name; }
 
     // Read raw voltage value (in millivolts)
-    virtual int read();
+    virtual int readVoltage();
+
+    // Read voltage as a ratio between min and max
+    virtual float readPercent();
 };
 
 } /* namespace bbbkit */
