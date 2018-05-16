@@ -20,6 +20,11 @@
 #include <iostream>
 #include <sstream>
 
+#include <fcntl.h>
+#include <iomanip>
+#include <stdio.h>
+#include <unistd.h>
+
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
@@ -50,7 +55,7 @@ I2C::~I2C() {
 
 int I2C::open() {
     // Open I2C bus
-    if ((this->file = std::open(this->path, O_RDWR)) < 0) {
+    if ((this->file = ::open((this->path).c_str(), O_RDWR)) < 0) {
         std::cout << "I2C: Error opening bus." << std::endl;
         return -1;
     }
@@ -72,7 +77,7 @@ int I2C::write(unsigned char value) {
     // Write value to device
     unsigned char buffer[1];
     buffer[0] = value;
-    if (std::write(this->file, buffer, 1) != 1) {
+    if (::write(this->file, buffer, 1) != 1) {
         std::cout << "I2C: Error writing to device." << std::endl;
         return -1;
     }
@@ -84,10 +89,11 @@ int I2C::writeRegister(unsigned int address, unsigned char value) {
     unsigned char buffer[2];
     buffer[0] = address;
     buffer[1] = value;
-    if (std::write(this->file, buffer, 2) != 2) {
+    if (::write(this->file, buffer, 2) != 2) {
         std::cout << "I2C: Error writing to device register." << std::endl;
         return -1;
     }
+    return 0;
 }
 
 unsigned char I2C::readRegister(unsigned int address) {
@@ -96,7 +102,7 @@ unsigned char I2C::readRegister(unsigned int address) {
 
     // Read response
     unsigned char buffer[1];
-    if (std::read(this->file, buffer, 1) != 1) {
+    if (::read(this->file, buffer, 1) != 1) {
         std::cout << "I2C: Error reading from device register." << std::endl;
         return -1;
     }
@@ -110,8 +116,8 @@ unsigned char *I2C::readRegisters(unsigned int startAddress, unsigned int count)
     this->write(startAddress);
 
     // Read response
-    unsigned char *buffer[count];
-    if (std::read(this->file, buffer, count) != (int)count) {
+    unsigned char *buffer = new unsigned char[count];
+    if (::read(this->file, buffer, count) != (int)count) {
         std::cout << "I2C: Error reading from device registers." << std::endl;
         return NULL;
     }
@@ -124,7 +130,7 @@ void I2C::close() {
     if (this->isOpen()) {
         std::cout << "I2C: Bus already closed." << std::endl;
     } else {
-        std::close(this->file);
+        ::close(this->file);
         this->file = I2C_FILE_NULL;
     }
 }

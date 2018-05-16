@@ -18,6 +18,8 @@
 #ifndef I2C_H
 #define I2C_H
 
+#include <string>
+
 namespace bbbkit {
 
 class I2C {
@@ -35,7 +37,7 @@ private:
 
 public:
     I2C(I2C::BUS bus, unsigned int deviceAddress);
-    virtual ~I2CDevice();
+    virtual ~I2C();
 
     // Open I2C bus to device
     virtual int open();
@@ -53,7 +55,7 @@ public:
     virtual unsigned char readRegister(unsigned int address);
 
     // Read value from multiple I2C device registers (in one read operation)
-    virtual unsigned char *readRegisters(unsigned int startAddress=0x0, unsigned int count);
+    virtual unsigned char *readRegisters(unsigned int startAddress, unsigned int count);
 
     // Close I2C bus to device
     virtual void close();

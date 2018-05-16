@@ -19,7 +19,7 @@
 
 namespace bbbkit {
 
-DCMotor(PWM::PIN pinPWM, int dutyCyclePeriodNS, float speedPercent); {
+DCMotor::DCMotor(PWM::PIN pinPWM, int dutyCyclePeriodNS, float speedPercent) {
     this->pwm = new PWM(pinPWM);
 
     this->setDutyCyclePeriod(dutyCyclePeriodNS);
@@ -32,11 +32,11 @@ DCMotor::~DCMotor() {
 
 // Getters and setters
 
-int DCMotor::setDutyCyclePeriod(unsigned int periodNS)  {
+int DCMotor::setDutyCyclePeriod(unsigned int periodNS) {
     return this->pwm->setPeriod(periodNS);
 }
 
-int DCMotor::setSpeedPercent(float speedPercent)  {
+int DCMotor::setSpeedPercent(float speedPercent) {
     this->speedPercent = speedPercent;
     return this->pwm->setDutyCycleAsPercent(this->speedPercent);
 }
@@ -51,7 +51,7 @@ bool DCMotor::isRunning() {
     return this->pwm->isRunning();
 }
 
-int DCMotor::stop()  {
+int DCMotor::stop() {
     return this->pwm->stop();
 }
 

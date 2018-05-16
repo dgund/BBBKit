@@ -18,11 +18,12 @@
 #include "StepperMotor.h"
 
 #include <cmath>
+#include <unistd.h>
 
 namespace bbbkit {
 
 StepperMotor::StepperMotor(GPIO::PIN pinStep, GPIO::PIN pinDirection, GPIO::PIN pinSleep,
-                            StepperMotor::DIRECTION direction=StepperMotor::DIRECTION::CLOCKWISE,
+                            StepperMotor::DIRECTION direction,
                             int stepsPerRevolution, float revolutionsPerMinute, int stepFactor) {
     // Initialize GPIO pins
     this->gpioStep = new GPIO(pinStep, GPIO::DIRECTION::OUTPUT);

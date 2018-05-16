@@ -26,9 +26,11 @@
 
 namespace bbbkit {
 
-    ADC::ADC(ADC::PIN pin) {
+    ADC::ADC(ADC::PIN pin, int voltageMinMV, int voltageMaxMV) {
         this->pin = pin;
         this->name = this->nameMap[this->pin];
+        this->voltageMinMV = voltageMinMV;
+        this->voltageMaxMV = voltageMaxMV;
 
         std::stringstream adcPathStream;
         adcPathStream << ADC_SYSFS_PATH << pin << ADC_SYSFS_VOLTAGE_RAW;

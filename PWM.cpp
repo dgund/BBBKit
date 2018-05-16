@@ -17,6 +17,8 @@
 
 #include "PWM.h"
 
+#include <unistd.h>
+
 #include "Readwrite.h"
 
 /*
@@ -62,6 +64,7 @@
 #define PWM_SYSFS_PERIOD "period"
 #define PWM_SYSFS_POLARITY "polarity"
 #define PWM_SYSFS_RUN "run"
+#define PWM_SYSFS_UNEXPORT "unexport"
 
 #define PERCENT_MIN 0.0
 #define PERCENT_MAX 100.0
@@ -75,7 +78,7 @@ const std::string pathMap[7] = {
     PWM_SYSFS_PATH_EHRPWM2,
     PWM_SYSFS_PATH_EHRPWM2,
     PWM_SYSFS_PATH_ECAP0,
-}
+};
 
 const std::string nameMap[7] = {
     PWM_SYSFS_EHRPWM0A,
@@ -101,8 +104,8 @@ namespace bbbkit {
 
 PWM::PWM(PWM::PIN pin, PWM::VALUE activeState) {
     this->pin = pin;
-    this->name = this->nameMap[static_cast<int>(this->pin)];
-    this->path = this->pathMap[static_cast<int>(this->pin)] + this->name + "/";
+    this->name = nameMap[static_cast<int>(this->pin)];
+    this->path = pathMap[static_cast<int>(this->pin)] + this->name + "/";
 
     // Export the pin (delay to give Linux some time)
     this->exportPin();
@@ -178,11 +181,11 @@ int PWM::stop() {
 // Private
 
 int PWM::exportPin() {
-   return write(this->pathMap[static_cast<int>(this->pin)], GPIO_SYSFS_EXPORT, this->channelMap[static_cast<int>(this->pin)]);
+   return write(pathMap[static_cast<int>(this->pin)], PWM_SYSFS_EXPORT, channelMap[static_cast<int>(this->pin)]);
 }
 
 int PWM::unexportPin() {
-   return write(this->pathMap[static_cast<int>(this->pin)], GPIO_SYSFS_UNEXPORT, this->channelMap[static_cast<int>(this->pin)]);
+   return write(pathMap[static_cast<int>(this->pin)], PWM_SYSFS_UNEXPORT, channelMap[static_cast<int>(this->pin)]);
 }
 
 } /* namespace bbbkit */

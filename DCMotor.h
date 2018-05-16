@@ -25,8 +25,6 @@ namespace bbbkit {
 class DCMotor {
 
 private:
-    // GPIO motor direction
-    GPIO *gpio;
     // PWM for motor speed
     PWM *pwm;
     // Motor speed as a percentage
