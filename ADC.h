@@ -56,11 +56,11 @@ public:
     virtual std::string getPath() { return this->path; }
     virtual std::string getName() { return this->name; }
 
-    // Read raw voltage value (in millivolts)
-    virtual int readVoltage();
+    // Read raw voltage value in millivolts (averaged over count)
+    virtual int readVoltage(int count=1);
 
-    // Read voltage as a ratio between min and max
-    virtual float readPercent();
+    // Read voltage as a ratio between min and max (averaged over count)
+    virtual float readRatio(int count=1);
 };
 
 } /* namespace bbbkit */

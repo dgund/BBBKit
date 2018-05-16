@@ -37,23 +37,40 @@ namespace bbbkit {
 
     ADC::~ADC() {}
     
-    // Read raw voltage value (in millivolts)
-    int ADC::readVoltage() {
-        int voltageMV = -1;
+    // Read raw voltage value in millivolts (averaged over count)
+    int ADC::readVoltage(int count) {
+        if (count < 1) {
+            return 0;
+        }
+
+        // Open stream
         std::ifstream adcValueStream;
         adcValueStream.open(this->path.c_str(), std::ios::in);
         if (!adcValueStream.is_open()) {
             perror("ADC: Failed to open stream.");
             return -1;
         }
-        adcValueStream >> voltageMV;
+
+        // Sum ADC voltage over count
+        long voltageSumMV = -1;
+        for (int i = 0; i < count; i++) {
+            // Read ADC
+            int voltageMV = -1;
+            adcValueStream >> voltageMV;
+            // Add to sum
+            voltageSumMV += voltageMV;
+        }
+
+        // Close stream
         adcValueStream.close();
-        return voltageMV;
+
+        // Average ADC voltage over count
+        return static_cast<int>(voltageSumMV / count);
     }
 
-    // Read voltage as a ratio between min and max
-    float ADC::readPercent() {
-        int voltageMV = this->readVoltage();
+    // Read voltage as a ratio between min and max (averaged over count)
+    float ADC::readRatio(int count) {
+        int voltageMV = this->readVoltage(count);
         float ratio = ((float)voltageMV - float(this->voltageMinMV)) / (float(this->voltageMaxMV) - float(this->voltageMinMV));
         return ratio;
     }
