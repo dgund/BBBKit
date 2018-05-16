@@ -15,42 +15,34 @@
     limitations under the License.
 */
 
-#ifndef DCMOTOR_H_
-#define DCMOTOR_H_
+#ifndef DCMOTOR_H
+#define DCMOTOR_H
 
-#include "GPIO.h"
 #include "PWM.h"
 
 namespace bbbkit {
 
 class DCMotor {
 
-public:
-    enum DIRECTION { CLOCKWISE, COUNTERCLOCKWISE };
-
 private:
     // GPIO motor direction
     GPIO *gpio;
     // PWM for motor speed
     PWM *pwm;
-
-    DCMotor::DIRECTION direction;
+    // Motor speed as a percentage
     float speedPercent;
 
 public:
-    DCMotor(GPIO *gpio, PWM *pwm, DCMotor::DIRECTION direction=DCMotor::DIRECTION::CLOCKWISE, float speedPercent=0.0, int dutyCyclePeriodNS=4000);
+    DCMotor(PWM::PIN pinPWM, int dutyCyclePeriodNS=1000, float speedPercent=0.0);
     virtual ~DCMotor();
     
     // Getters and setters
-    
-    virtual DCMotor::DIRECTION getDirection() { return this->direction; }
-    virtual int setDirection(DCMotor::DIRECTION direction);
-
-    virtual int getSpeedPercent() { return this->speedPercent; }
-    virtual int setSpeedPercent(float speedPercent);
 
     virtual int getDutyCyclePeriod() { return this->pwm->getPeriod(); }
     virtual int setDutyCyclePeriod(unsigned int periodNS);
+
+    virtual int getSpeedPercent() { return this->speedPercent; }
+    virtual int setSpeedPercent(float speedPercent);
 
     // Motor control
 
@@ -61,5 +53,5 @@ public:
 
 } /* namespace bbbkit */
 
-#endif /* DCMOTOR_H_ */
+#endif /* DCMOTOR_H */
 

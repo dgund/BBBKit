@@ -19,39 +19,26 @@
 
 namespace bbbkit {
 
-DCMotor::DCMotor(GPIO *gpio, PWM *pwm, DCMotor::DIRECTION direction, float speedPercent, int dutyCyclePeriodNS) {
-    this->gpio = gpio;
-    this->gpio->setDirection(GPIO::OUTPUT);
-    this->pwm = pwm;
-    this->pwm->setActiveState(PWM::VALUE::LOW);
+DCMotor(PWM::PIN pinPWM, int dutyCyclePeriodNS, float speedPercent); {
+    this->pwm = new PWM(pinPWM);
 
-    this->setDirection(direction);
-    this->setSpeedPercent(speedPercent);
     this->setDutyCyclePeriod(dutyCyclePeriodNS);
+    this->setSpeedPercent(speedPercent);
 }
 
-DCMotor::~DCMotor() {}
+DCMotor::~DCMotor() {
+    delete this->pwm;
+}
 
 // Getters and setters
 
-int DCMotor::setDirection(DCMotor::DIRECTION direction)  {
-    this->direction = direction;
-
-    if (this->direction == DCMotor::DIRECTION::CLOCKWISE){
-        return this->gpio->setValue(GPIO::HIGH);
-    }
-    else {
-        return this->gpio->setValue(GPIO::LOW);
-    }
+int DCMotor::setDutyCyclePeriod(unsigned int periodNS)  {
+    return this->pwm->setPeriod(periodNS);
 }
 
 int DCMotor::setSpeedPercent(float speedPercent)  {
     this->speedPercent = speedPercent;
     return this->pwm->setDutyCycleAsPercent(this->speedPercent);
-}
-
-int DCMotor::setDutyCyclePeriod(unsigned int periodNS)  {
-    return this->pwm->setPeriod(periodNS);
 }
 
 // Motor control
