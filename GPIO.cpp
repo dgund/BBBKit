@@ -80,11 +80,11 @@ GPIO::~GPIO() {
 
 // Getters and setters
 
-int getDebounce() {
+int GPIO::getDebounce() {
     return this->debounce;
 }
 
-int setDebounce(int debounce) {
+int GPIO::setDebounce(int debounce) {
     this->debounce = debounce;
     return 0;
 }
@@ -236,7 +236,7 @@ int GPIO::waitForEdgeThread(CallbackFunction_t callbackFunction) {
     return 0;
 }
 
-int stopWaitForEdgeThread() {
+int GPIO::stopWaitForEdgeThread() {
     this->threadRunning = false;
     return 0;
 }
