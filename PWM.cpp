@@ -30,7 +30,7 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#define PWM_SYSFS_PATH_PWMCHIP(chip) "/sys/class/pwm/pwmchip" STR(chip)
+#define PWM_SYSFS_PATH_PWMCHIP(chip) "/sys/class/pwm/pwmchip" STR(chip) "/"
 #define PWM_SYSFS_PWM(chip, channel) "pwm-" STR(chip) ":" STR(channel)
 
 #define PWM_SYSFS_EHRPWM0_CHIP 1
@@ -60,10 +60,10 @@
 
 #define PWM_SYSFS_DELAY 200000
 #define PWM_SYSFS_EXPORT "export"
-#define PWM_SYSFS_DUTY "duty"
+#define PWM_SYSFS_DUTY "duty_cycle"
 #define PWM_SYSFS_PERIOD "period"
 #define PWM_SYSFS_POLARITY "polarity"
-#define PWM_SYSFS_RUN "run"
+#define PWM_SYSFS_ENABLE "enable"
 #define PWM_SYSFS_UNEXPORT "unexport"
 
 #define PERCENT_MIN 0.0
@@ -120,12 +120,12 @@ PWM::~PWM() {
 }
 
 PWM::VALUE PWM::getActiveState() {
-    if (std::stoi(read(this->path, PWM_SYSFS_POLARITY)) == PWM::VALUE::LOW) return PWM::VALUE::LOW;
+    if (std::stoi(read(this->path, PWM_SYSFS_POLARITY)) == static_cast<int>(PWM::VALUE::LOW)) return PWM::VALUE::LOW;
     else return PWM::VALUE::HIGH;
 }
 
 int PWM::setActiveState(PWM::VALUE activeState) {
-    return write(this->path, PWM_SYSFS_POLARITY, activeState);
+    return write(this->path, PWM_SYSFS_POLARITY, static_cast<int>(activeState));
 }
 
 unsigned int PWM::getPeriod() {
@@ -167,15 +167,15 @@ int PWM::setDutyCycleAsPercent(float dutyCyclePercent) {
 }
 
 int PWM::start() {
-    return write(this->path, PWM_SYSFS_RUN, PWM::VALUE::HIGH);
+    return write(this->path, PWM_SYSFS_ENABLE, static_cast<int>(PWM::VALUE::HIGH));
 }
 
 bool PWM::isRunning() {
-    return std::stoi(read(this->path, PWM_SYSFS_RUN)) == PWM::VALUE::HIGH;
+    return std::stoi(read(this->path, PWM_SYSFS_ENABLE)) == static_cast<int>(PWM::VALUE::HIGH);
 }
 
 int PWM::stop() {
-    return write(this->path, PWM_SYSFS_RUN, PWM::VALUE::LOW);
+    return write(this->path, PWM_SYSFS_ENABLE, static_cast<int>(PWM::VALUE::LOW));
 }
 
 // Private
