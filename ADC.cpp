@@ -19,22 +19,41 @@
 
 #include <fstream>
 #include <iostream>
-#include <sstream>
 
-#define ADC_SYSFS_PATH "/sys/devices/iio:device0/in_voltage"
-#define ADC_SYSFS_VOLTAGE_RAW "_raw"
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+#define ADC_SYSFS_PATH(input) "/sys/bus/iio/iio:device0/in_voltage" STR(input) "_raw"
+#define ADC_SYSFS_ADC(input) "AIN" STR(input)
+
+const std::string pathMap[7] = {
+    ADC_SYSFS_PATH(0),
+    ADC_SYSFS_PATH(1),
+    ADC_SYSFS_PATH(2),
+    ADC_SYSFS_PATH(3),
+    ADC_SYSFS_PATH(4),
+    ADC_SYSFS_PATH(5),
+    ADC_SYSFS_PATH(6),
+};
+
+const std::string nameMap[7] = {
+    ADC_SYSFS_ADC(0),
+    ADC_SYSFS_ADC(1),
+    ADC_SYSFS_ADC(2),
+    ADC_SYSFS_ADC(3),
+    ADC_SYSFS_ADC(4),
+    ADC_SYSFS_ADC(5),
+    ADC_SYSFS_ADC(6),
+};
 
 namespace bbbkit {
 
     ADC::ADC(ADC::PIN pin, int voltageMinMV, int voltageMaxMV) {
         this->pin = pin;
-        this->name = this->nameMap[this->pin];
+        this->path = pathMap[static_cast<int>(this->pin)];
+        this->name = nameMap[static_cast<int>(this->pin)];
         this->voltageMinMV = voltageMinMV;
         this->voltageMaxMV = voltageMaxMV;
-
-        std::stringstream adcPathStream;
-        adcPathStream << ADC_SYSFS_PATH << pin << ADC_SYSFS_VOLTAGE_RAW;
-        this->path = adcPathStream.str();
     }
 
     ADC::~ADC() {}
@@ -46,10 +65,10 @@ namespace bbbkit {
         }
 
         // Open stream
-        std::ifstream adcValueStream;
-        adcValueStream.open(this->path.c_str(), std::ios::in);
-        if (!adcValueStream.is_open()) {
-            perror("ADC: Failed to open stream.");
+        std::ifstream adcStream;
+        adcStream.open(this->path.c_str(), std::ios::in);
+        if (!adcStream.is_open()) {
+            std::cout << "ADC: Failed to open stream." << std::endl;
             return -1;
         }
 
@@ -58,13 +77,13 @@ namespace bbbkit {
         for (int i = 0; i < count; i++) {
             // Read ADC
             int voltageMV = -1;
-            adcValueStream >> voltageMV;
+            adcStream >> voltageMV;
             // Add to sum
             voltageSumMV += voltageMV;
         }
 
         // Close stream
-        adcValueStream.close();
+        adcStream.close();
 
         // Average ADC voltage over count
         return static_cast<int>(voltageSumMV / count);

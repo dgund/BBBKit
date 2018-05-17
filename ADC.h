@@ -15,8 +15,8 @@
     limitations under the License.
 */
 
-#ifndef ADC_H_
-#define ADC_H_
+#ifndef ADC_H
+#define ADC_H
 
 #include <string>
 
@@ -24,29 +24,29 @@ namespace bbbkit {
 
 class ADC {
 public:
-    enum PIN { AIN0 = 0,
-               AIN1 = 1,
-               AIN2 = 2,
-               AIN3 = 3,
-               AIN4 = 4,
-               AIN5 = 5,
-               AIN6 = 6
-             };
+    enum PIN {
+        AIN0 = 0,
+        AIN1 = 1,
+        AIN2 = 2,
+        AIN3 = 3,
+        AIN4 = 4,
+        AIN5 = 5,
+        AIN6 = 6,
+        P9_33 = AIN4,
+        P9_35 = AIN6,
+        P9_36 = AIN5,
+        P9_37 = AIN2,
+        P9_38 = AIN3,
+        P9_39 = AIN0,
+        P9_40 = AIN1,
+    };
 
 private:
-    const std::string nameMap[7] = { "AIN0",
-                                     "AIN1",
-                                     "AIN2",
-                                     "AIN3",
-                                     "AIN4",
-                                     "AIN5",
-                                     "AIN6",
-                                   };
     ADC::PIN pin;
-    int voltageMinMV;
-    int voltageMaxMV;
     std::string path;
     std::string name;
+    int voltageMinMV;
+    int voltageMaxMV;
 
 public:
     ADC(ADC::PIN pin, int voltageMinMV=0, int voltageMaxMV=1800);
@@ -65,5 +65,5 @@ public:
 
 } /* namespace bbbkit */
 
-#endif /* ADC_H_ */
+#endif /* ADC_H */
 
