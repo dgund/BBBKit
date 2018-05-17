@@ -36,6 +36,8 @@
 #define GPIO_SYSFS_UNEXPORT "unexport"
 
 #define GPIO_SYSFS_ACTIVE_LOW "active_low"
+#define GPIO_SYSFS_ACTIVE_LOW_FALSE 0
+#define GPIO_SYSFS_ACTIVE_LOW_TRUE 1
 
 #define GPIO_SYSFS_DIRECTION "direction"
 #define GPIO_SYSFS_DIRECTION_INPUT "in"
@@ -59,7 +61,7 @@ GPIO::GPIO(GPIO::PIN pin, GPIO::DIRECTION direction, GPIO::VALUE activeState) {
 
     // Format the name and path for the BeagleBone
     std::stringstream nameStream;
-    nameStream << GPIO_SYSFS_GPIO << static_cast<int>(pin);
+    nameStream << GPIO_SYSFS_GPIO << static_cast<int>(this->pin);
     this->name = nameStream.str();
     this->path = GPIO_SYSFS_PATH + this->name + "/";
 
@@ -78,14 +80,26 @@ GPIO::~GPIO() {
 
 // Getters and setters
 
+int getDebounce() {
+    return this->debounce;
+}
+
+int setDebounce(int debounce) {
+    this->debounce = debounce;
+    return 0;
+}
+
 GPIO::DIRECTION GPIO::getDirection() {
     std::string directionString = read(this->path, GPIO_SYSFS_DIRECTION);
-    if (directionString == GPIO_SYSFS_DIRECTION_INPUT) return INPUT;
-    else return OUTPUT;
+    if (directionString == GPIO_SYSFS_DIRECTION_INPUT) {
+        return INPUT;
+    } else {
+        return OUTPUT;
+    }
 }
 
 int GPIO::setDirection(GPIO::DIRECTION direction) {
-    switch(direction) {
+    switch (direction) {
     case INPUT:
         return write(this->path, GPIO_SYSFS_DIRECTION, GPIO_SYSFS_DIRECTION_INPUT);
     case OUTPUT:
@@ -95,35 +109,52 @@ int GPIO::setDirection(GPIO::DIRECTION direction) {
 }
 
 GPIO::VALUE GPIO::getActiveState() {
-    if (std::stoi(read(this->path, GPIO_SYSFS_ACTIVE_LOW)) == GPIO::VALUE::HIGH) return GPIO::VALUE::LOW;
-    else return GPIO::VALUE::HIGH;
+    if (std::stoi(read(this->path, GPIO_SYSFS_ACTIVE_LOW)) == GPIO_SYSFS_ACTIVE_LOW_TRUE) {
+        return GPIO::VALUE::LOW;
+    } else {
+        return GPIO::VALUE::HIGH;
+    }
 }
 
 int GPIO::setActiveState(GPIO::VALUE activeState) {
-    return write(this->path, GPIO_SYSFS_ACTIVE_LOW, !activeState);
+    switch (activeState) {
+    case LOW:
+        return write(this->path, GPIO_SYSFS_ACTIVE_LOW, GPIO_SYSFS_ACTIVE_LOW_TRUE);
+    case HIGH:
+        return write(this->path, GPIO_SYSFS_ACTIVE_LOW, GPIO_SYSFS_ACTIVE_LOW_FALSE);
+    }
+    return -1;
 }
 
 // General input
 
 GPIO::VALUE GPIO::getValue() {
-    if (std::stoi(read(this->path, GPIO_SYSFS_VALUE)) == GPIO::VALUE::LOW) return GPIO::VALUE::LOW;
-    else return GPIO::VALUE::HIGH;
+    if (std::stoi(read(this->path, GPIO_SYSFS_VALUE)) == static_cast<int>(GPIO::VALUE::LOW)) {
+        return GPIO::VALUE::LOW;
+    } else {
+        return GPIO::VALUE::HIGH;
+    }
 }
 
 // General output
 
 int GPIO::setValue(GPIO::VALUE value) {
-    return write(this->path, GPIO_SYSFS_VALUE, value);
+    return write(this->path, GPIO_SYSFS_VALUE, static_cast<int>(value));
 }
 
 // Edge input
 
 GPIO::EDGE GPIO::getEdgeType() {
     std::string edgeTypeString = read(this->path, GPIO_SYSFS_EDGE);
-    if (edgeTypeString == GPIO_SYSFS_EDGE_RISING) return RISING;
-    else if (edgeTypeString == GPIO_SYSFS_EDGE_FALLING) return FALLING;
-    else if (edgeTypeString == GPIO_SYSFS_EDGE_BOTH) return BOTH;
-    else return NONE;
+    if (edgeTypeString == GPIO_SYSFS_EDGE_RISING) {
+        return RISING;
+    } else if (edgeTypeString == GPIO_SYSFS_EDGE_FALLING) {
+        return FALLING;
+    } else if (edgeTypeString == GPIO_SYSFS_EDGE_BOTH) {
+        return BOTH;
+    } else {
+        return NONE;
+    }
 }
 
 int GPIO::setEdgeType(GPIO::EDGE edgeType) {
@@ -143,21 +174,21 @@ int GPIO::setEdgeType(GPIO::EDGE edgeType) {
 int GPIO::waitForEdge() {
     // Check if direction is input
     if (this->getDirection() != INPUT) {
-        perror("GPIO: Edge pin must be input.");
+        std::cout << "GPIO: Edge pin must be input." << std::endl;
         return -1;
     }
 
     // Create epoll instance
     int epollfd = epoll_create(1);
     if (epollfd < 0) {
-        perror("GPIO: Failed to create epoll instance.");
+        std::cout << "GPIO: Failed to create epoll instance." << std::endl;
         return -1;
     }
 
     // Create file descriptor
     int fd = open((this->path + GPIO_SYSFS_VALUE).c_str(), O_RDONLY | O_NONBLOCK);
     if (fd < 0) {
-        perror("GPIO: Failed to open file.");
+        std::cout << "GPIO: Failed to open file." << std::endl;
         return -1;
     }
 
@@ -168,7 +199,7 @@ int GPIO::waitForEdge() {
 
     // Register event and file descriptor on epoll instance
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event) < 0) {
-        perror("GPIO: Failed to register epoll event.");
+        std::cout << "GPIO: Failed to register epoll event." << std::endl;
         close (fd);
         return -1;
     }
@@ -178,7 +209,7 @@ int GPIO::waitForEdge() {
     while (edgeCount <= 1) {
         int trigger = epoll_wait(epollfd, &event, 1, -1);
         if (trigger < 0){
-            perror("GPIO: epoll_wait failed.");
+            std::cout << "GPIO: epoll_wait failed." << std::endl;
             close (fd);
             return -1;
         }
@@ -191,26 +222,31 @@ int GPIO::waitForEdge() {
 
 int GPIO::waitForEdgeThread(CallbackFunction_t callbackFunction) {
     if (this->threadRunning) {
-        perror("GPIO: Edge thread already running.");
+        std::cout << "GPIO: Edge thread already running." << std::endl;
         return -1;
     }
     
     this->threadCallbackFunction = callbackFunction;
     this->threadRunning = true;
     if(pthread_create(&this->thread, NULL, &threadEdgePoll, static_cast<void *>(this)) != 0) {
-        perror("GPIO: Failed to create the edge thread.");
+        std::cout << "GPIO: Failed to create the edge thread." << std::endl;
         this->threadRunning = false;
         return -1;
     }
     return 0;
 }
 
+int stopWaitForEdgeThread() {
+    this->threadRunning = false;
+    return 0;
+}
+
 // Stream output
 
 int GPIO::streamOpen() {
-    stream.open((path + GPIO_SYSFS_VALUE).c_str());
+    stream.open((this->path + GPIO_SYSFS_VALUE).c_str());
     if (!stream.is_open()) {
-        perror("GPIO: Failed to open stream.");
+        std::cout << "GPIO: Failed to open stream." << std::endl;
         return -1;
     }
     return 0;
@@ -237,7 +273,7 @@ int GPIO::unexportPin() {
 }
 
 void *threadEdgePoll(void *value) {
-    GPIO *gpio = static_cast<GPIO*>(value);
+    GPIO *gpio = static_cast<GPIO *>(value);
     while(gpio->threadRunning) {
         gpio->threadCallbackFunction(gpio->waitForEdge());
         usleep(gpio->debounce * 1000);
