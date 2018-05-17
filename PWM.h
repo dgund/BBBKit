@@ -15,8 +15,8 @@
     limitations under the License.
 */
 
-#ifndef PWM_H_
-#define PWM_H_
+#ifndef PWM_H
+#define PWM_H
 
 #include <string>
 
@@ -31,14 +31,20 @@ public:
         EHRPWM1B = 3,
         EHRPWM2A = 4,
         EHRPWM2B = 5,
-        ECAP0    = 6,
+        ECAPPWM0 = 6,
+        ECAPPWM2 = 7,
         P8_13 = EHRPWM2B,
         P8_19 = EHRPWM2A,
+        P8_34 = EHRPWM1B,
+        P8_36 = EHRPWM1A,
+        P8_45 = EHRPWM2A,
+        P8_46 = EHRPWM2B,
         P9_14 = EHRPWM1A,
         P9_16 = EHRPWM1B,
         P9_21 = EHRPWM0B,
         P9_22 = EHRPWM0A,
-        P9_42 = ECAP0,
+        P9_28 = ECAPPWM2,
+        P9_42 = ECAPPWM0,
     };
 
     enum VALUE{ LOW=0, HIGH=1 };
@@ -54,9 +60,9 @@ public:
 
     // Getters and setters
 
-    virtual PWM::PIN getPin() { return pin; }
-    virtual std::string getPath() { return path; }
-    virtual std::string getName() { return name; }
+    virtual PWM::PIN getPin() { return this->pin; }
+    virtual std::string getPath() { return this->path; }
+    virtual std::string getName() { return this->name; }
 
     virtual PWM::VALUE getActiveState();
     virtual int setActiveState(PWM::VALUE activeState);
@@ -83,4 +89,4 @@ private:
 
 } /* namespace bbbkit */
 
-#endif /* PWM_H_ */
+#endif /* PWM_H */
