@@ -30,7 +30,7 @@
 
 #define GPIO_SYSFS_PATH "/sys/class/gpio/"
 #define GPIO_SYSFS_GPIO "gpio"
-#define GPIO_SYSFS_DELAY 200000
+#define GPIO_SYSFS_DELAY 300000
 
 #define GPIO_SYSFS_EXPORT "export"
 #define GPIO_SYSFS_UNEXPORT "unexport"

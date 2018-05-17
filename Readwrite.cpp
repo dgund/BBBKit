@@ -27,6 +27,7 @@ std::string read(std::string filepath, std::string filename) {
     readStream.open((filepath + filename).c_str());
     if (!readStream.is_open()) {
         perror("Readwrite: Read failed to open file.");
+        std::cout << filepath + filename << std::endl;
     }
     std::string value;
     std::getline(readStream, value);
@@ -39,6 +40,7 @@ int write(std::string filepath, std::string filename, std::string value) {
     writeStream.open((filepath + filename).c_str());
     if (!writeStream.is_open()) {
        perror("Readwrite: Write failed to open file.");
+       std::cout << filepath + filename << std::endl;
        return -1;
     }
     writeStream << value;
