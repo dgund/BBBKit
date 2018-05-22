@@ -65,18 +65,12 @@ GPIO::GPIO(GPIO::PIN pin, GPIO::DIRECTION direction, GPIO::VALUE activeState) {
     this->name = nameStream.str();
     this->path = GPIO_SYSFS_PATH + this->name + "/";
 
-    // Export the pin (delay to give Linux some time)
-    this->exportPin();
-    usleep(GPIO_SYSFS_DELAY);
-
     // Set direction and active state
     this->setDirection(direction);
     this->setActiveState(activeState);
 }
 
-GPIO::~GPIO() {
-    this->unexportPin();
-}
+GPIO::~GPIO() {}
 
 // Getters and setters
 
