@@ -31,8 +31,8 @@
 #define STR(x) STR_HELPER(x)
 
 #define PWM_SYSFS_PATH_PWMCHIP(chip) "/sys/class/pwm/pwmchip" STR(chip) "/"
-//#define PWM_SYSFS_PWM(chip, channel) "pwm-" STR(chip) ":" STR(channel)
-#define PWM_SYSFS_PWM(chip, channel) "pwm" STR(channel) // For old sysfs (pre-4.14)
+#define PWM_SYSFS_PWM(chip, channel) "pwm-" STR(chip) ":" STR(channel)
+//#define PWM_SYSFS_PWM(chip, channel) "pwm" STR(channel) // For old sysfs (pre-4.14)
 
 #define PWM_SYSFS_EHRPWM0_CHIP 1
 #define PWM_SYSFS_EHRPWM0A_CHANNEL 0

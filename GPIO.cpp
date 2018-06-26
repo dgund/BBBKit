@@ -66,8 +66,8 @@ GPIO::GPIO(GPIO::PIN pin, GPIO::DIRECTION direction, GPIO::VALUE activeState) {
     this->path = GPIO_SYSFS_PATH + this->name + "/";
 
     // For old sysfs (pre-4.14)
-    this->exportPin();
-    usleep(1000000);
+    //this->exportPin();
+    //usleep(1000000);
 
     // Set direction and active state
     this->setDirection(direction);

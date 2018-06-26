@@ -23,8 +23,8 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-//#define ADC_SYSFS_PATH(input) "/sys/bus/iio/iio:device0/in_voltage" STR(input) "_raw"
-#define ADC_SYSFS_PATH(input) "/sys/bus/iio/devices/iio:device0/in_voltage" STR(input) "_raw" // For old sysfs (pre-4.14)
+#define ADC_SYSFS_PATH(input) "/sys/bus/iio/iio:device0/in_voltage" STR(input) "_raw"
+//#define ADC_SYSFS_PATH(input) "/sys/bus/iio/devices/iio:device0/in_voltage" STR(input) "_raw" // For old sysfs (pre-4.14)
 #define ADC_SYSFS_ADC(input) "AIN" STR(input)
 
 const std::string pathMap[7] = {
